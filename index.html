@@ -1162,26 +1162,51 @@ Developed by Ahmed AbdElsalam @01017096872
      * Service Worker Integration
      */
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('sw.js').then(function(registration) {
-                console.log('ServiceWorker registered');
-                setCache("التخزين المؤقت جاهز للعمل أوفلاين", true);
-                
-                if (!params.get('noredirect')) {
-                    waitForTap("جاهز — اضغط للتشغيل", go);
-                }
-            }).catch(function(err) {
-                console.log('ServiceWorker registration failed: ', err);
-                setCache("فشل تفعيل التخزين المؤقت");
-                waitForTap("اضغط للتشغيل رغم ذلك", go);
-            });
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+            console.log('ServiceWorker registered');
+            
+            // التحقق مما إذا كان الـ Service Worker مفعل مسبقاً أو قيد التثبيت
+            var worker = registration.installing || registration.waiting || registration.active;
+            
+            if (!navigator.serviceWorker.controller) {
+                setState("جارٍ التخزين المؤقت للعمل أوفلاين...", "warn");
+                setCache("يرجى الانتظار، يتم الآن تحميل ملفات الثغرة و الـ .bin ...");
+            }
+
+            // مراقبة حالة التثبيت
+            registration.onupdatefound = function() {
+                var installingWorker = registration.installing;
+                installingWorker.onstatechange = function() {
+                    if (installingWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            setCache("تم التخزين المؤقت بنجاح — جاهز أوفلاين", true);
+                            waitForTap("اضغط هنا للبدء", go);
+                        }
+                    }
+                };
+            };
+
+            // إذا كان مخزناً مسبقاً وجاهزاً
+            if (navigator.serviceWorker.controller) {
+                setCache("التخزين المؤقت جاهز — يعمل أوفلاين", true);
+                waitForTap("جاهز — اضغط للتشغيل", go);
+            } else {
+                // مهلة احتياطية في حال كان التثبيت سريعاً جداً
+                setTimeout(function() {
+                    setCache("تم تخزين الملفات بنجاح — جاهز أوفلاين", true);
+                    waitForTap("اضغط هنا للبدء", go);
+                }, 4000);
+            }
+
+        }).catch(function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+            setCache("فشل تفعيل التخزين المؤقت");
+            waitForTap("اضغط للتشغيل رغم ذلك", go);
         });
     } else {
-        setCache("جاهز للاستخدام", true);
+        setCache("المتصفح لا يدعم التخزين المؤقت", false);
         waitForTap("اضغط للتشغيل", go);
     }
-
-})();
 
 </script>
 
