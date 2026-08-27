@@ -1,4 +1,4 @@
-const CACHE_NAME = 'original-ps4-v4';
+const CACHE_NAME = 'original-ps4-v5';
 const ASSETS = [
   './',
   'index.html',
@@ -20,6 +20,7 @@ const ASSETS = [
   'patches/1300.bin'
 ];
 
+// تثبيت وحفظ الملفات في الكاش
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
@@ -29,6 +30,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
+// تفعيل وتنظيف الكاش القديم
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -44,11 +46,17 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// الاستماع لطلبات الجلب وخدمتها من الكاش
+// اعتراض الطلبات وخدمتها من الكاش مباشرة حتى لو كان الإنترنت مفصولاً
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
+        // إذا فشل الاتصال ولم يكن الملف موجوداً، يتم إرجاع الصفحة الرئيسية كحل احتياطي
+        return caches.match('./index.html');
+      });
     })
   );
 });
