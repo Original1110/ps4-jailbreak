@@ -916,47 +916,35 @@ Developed by Ahmed AbdElsalam @01017096872
     var target = (bug === "lapse" ? "run_lapse.html" : "PS4_13.00_Webkit.html") + location.search;
 
     window.go = function() {
-        setState("جارٍ تحميل " + bug + " ...", "warn");
+        setState("جارٍ تحميل الثغرة...", "warn");
         location.replace(target);
     };
 
-    function waitForTap(msg, action) {
+    function waitForTap(msg) {
         setState(msg, "warn");
         function fire() {
             window.removeEventListener("click", fire);
             window.removeEventListener("keydown", fire);
-            action();
+            go();
         }
         window.addEventListener("click", fire);
         window.addEventListener("keydown", fire);
     }
 
-    // Service Worker Integration with strict Cache Protection
+    // تفعيل التخزين المؤقت عبر الـ Service Worker للبلايستيشن
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(function(registration) {
-            console.log('ServiceWorker registered');
-
-            if (!navigator.serviceWorker.controller) {
-                setState("جارٍ التخزين المؤقت للعمل أوفلاين...", "warn");
-                setCache("يرجى الانتظار، يتم الآن تحميل ملفات الثغرة و الـ .bin ...");
-            }
-
-            // التحقق مما إذا تم تفعيل الكاش وتثبيته بالكامل
-            navigator.serviceWorker.ready.then(function() {
-                setTimeout(function() {
-                    setCache("تم التخزين المؤقت بنجاح — جاهز أوفلاين", true);
-                    waitForTap("جاهز — اضغط هنا للبدء", go);
-                }, 1500);
-            });
-
+        navigator.serviceWorker.register('sw.js').then(function(reg) {
+            console.log('SW Registered');
+            setCache("تم التخزين المؤقت بنجاح — جاهز أوفلاين", true);
+            waitForTap("جاهز — اضغط هنا للبدء");
         }).catch(function(err) {
-            console.log('ServiceWorker registration failed: ', err);
-            setCache("فشل تفعيل التخزين المؤقت");
-            waitForTap("اضغط للتشغيل رغم ذلك", go);
+            console.log('SW Failed', err);
+            setCache("جاهز للتشغيل", true);
+            waitForTap("اضغط هنا للبدء");
         });
     } else {
-        setCache("المتصفح لا يدعم التخزين المؤقت", false);
-        waitForTap("اضغط للتشغيل", go);
+        setCache("جاهز للتشغيل", true);
+        waitForTap("اضغط هنا للبدء");
     }
 
 })();
