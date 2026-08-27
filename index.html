@@ -1388,15 +1388,29 @@ Developed by Ahmed AbdElsalam @01017096872
 
 </script>
   
-  <script>
+
+<script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('sw.js').then(function(registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            setCache("تم التخزين المؤقت بنجاح — جاهز للعمل أوفلاين", true);
-        }, function(err) {
+            console.log('ServiceWorker registered');
+            
+            // التحقق مما إذا كان تم التخزين لأول مرة أو تم التحديث
+            if (!navigator.serviceWorker.controller) {
+                setState("جارٍ التخزين المؤقت للعمل أوفلاين...", "warn");
+                setCache("يرجى الانتظار حتى اكتمال التحميل...");
+            } else {
+                setCache("التخزين المؤقت جاهز — يعمل أوفلاين", true);
+                // إتاحة زر أو السماح بالانتقال بعد الاكتمال
+                setTimeout(function() {
+                    if (typeof go === 'function' && !params.get('noredirect')) {
+                        // الانتظار للضغط أو التشغيل اليدوي لضمان عدم القفز السريع
+                    }
+                }, 2000);
+            }
+        }).catch(function(err) {
             console.log('ServiceWorker registration failed: ', err);
-            setCache("فشل تفعيل التخزين المؤقت للـ Service Worker");
+            setCache("فشل تفعيل التخزين المؤقت");
         });
     });
 }
