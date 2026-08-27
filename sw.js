@@ -1,4 +1,4 @@
-const CACHE_NAME = 'original-ps4-v3';
+const CACHE_NAME = 'original-ps4-v4';
 const ASSETS = [
   './',
   'index.html',
@@ -44,6 +44,7 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// الاستماع لطلبات الجلب وخدمتها من الكاش
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
