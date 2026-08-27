@@ -782,38 +782,6 @@ body::after {
 
 }
 
-
-/* =====================================================
-   PULSE
-   ===================================================== */
-
-@keyframes pulse-glow {
-
-  0% {
-    opacity: 0.65;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.65;
-  }
-
-}
-
-
-.pulse {
-
-  animation:
-    pulse-glow
-    2.4s
-    ease-in-out
-    infinite;
-
-}
-
 </style>
 </head>
 
@@ -832,7 +800,7 @@ body::after {
 
     <div class="sub">
 
-      <span> </span>
+      <span>أسيوط - ش الجمهورية</span>
 
       &bull;
 
@@ -882,7 +850,6 @@ body::after {
 <!-- FOOTER -->
 
 <div class="footer-brand">
-
 Developed by Ahmed AbdElsalam @01017096872
 </div>
 
@@ -891,312 +858,96 @@ Developed by Ahmed AbdElsalam @01017096872
 
 (function () {
 
-
-    var stateEl =
-        document.getElementById("state");
-
-
-    var detEl =
-        document.getElementById("det");
-
-
-    var cacheEl =
-        document.getElementById("cache");
-
+    var stateEl = document.getElementById("state");
+    var detEl = document.getElementById("det");
+    var cacheEl = document.getElementById("cache");
 
     function setState(t, c) {
-
         stateEl.innerHTML = t;
-
         stateEl.className = c || "";
-
     }
-
 
     function setCache(t, ok) {
-
         cacheEl.textContent = t;
-
-        cacheEl.className =
-            ok ? "cacheok" : "";
-
+        cacheEl.className = ok ? "cacheok" : "";
     }
 
+    var params = new URLSearchParams(location.search);
+    var key = null, fwnum = null;
 
-    var params =
-        new URLSearchParams(location.search);
-
-
-    var key = null,
-        fwnum = null;
-
-
-    var m =
-        /PlayStation\s+4[\/ ](\d+)\.(\d+)/
-        .exec(navigator.userAgent);
-
+    var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
 
     if (m) {
-
-        var minor =
-            parseInt(m[2], 16);
-
-        var ms =
-            minor.toString(16);
-
-
-        if (ms.length < 2)
-            ms = "0" + ms;
-
-
-        key =
-            m[1] + "." + ms;
-
-
-        fwnum =
-            parseInt(m[1], 10) * 100
-            +
-            parseInt(ms, 10);
-
+        var minor = parseInt(m[2], 16);
+        var ms = minor.toString(16);
+        if (ms.length < 2) ms = "0" + ms;
+        key = m[1] + "." + ms;
+        fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
     }
 
+    var bug = null, why = "";
+    var forced = params.get("bug");
 
-    var bug = null,
-        why = "";
-
-
-    var forced =
-        params.get("bug");
-
-
-    if (
-        forced === "lapse" ||
-        forced === "poops"
-    ) {
-
+    if (forced === "lapse" || forced === "poops") {
         bug = forced;
-
-        why =
-            "تم التحديد يدوياً ?bug="
-            +
-            forced;
-
-    }
-
-    else if (!key) {
-
-        why =
-            "هذا المتصفح ليس بلايستيشن 4";
-
-    }
-
-    else if (fwnum <= 1202) {
-
+        why = "تم التحديد يدوياً ?bug=" + forced;
+    } else if (!key) {
+        why = "هذا المتصفح ليس بلايستيشن 4";
+    } else if (fwnum <= 1202) {
         bug = "lapse";
-
-        why =
-            key +
-            " — متوافق (Lapse)";
-
-    }
-
-    else if (fwnum >= 1250) {
-
+        why = key + " — متوافق (Lapse)";
+    } else if (fwnum >= 1250) {
         bug = "poops";
-
-        why =
-            key +
-            " — متوافق (Poops)";
-
+        why = key + " — متوافق (Poops)";
+    } else {
+        why = key + " — غير مدعوم";
     }
 
-    else {
+    var fwDisplay = key ? "<b>" + key + "</b>" : "<span style='color:#8f9eb0;'>غير معروف</span>";
+    var bugDisplay = bug ? "<span class='chip'>" + bug.toUpperCase() + "</span>" : "<span style='color:#8f9eb0;'>لا يوجد</span>";
 
-        why =
-            key +
-            " — غير مدعوم";
-
-    }
-
-
-    /*
-     * عرض معلومات النظام
-     */
-
-    var fwDisplay =
-        key
-        ?
-        "<b>" + key + "</b>"
-        :
-        "<span style='color:#8f9eb0;'>غير معروف</span>";
-
-
-    var bugDisplay =
-        bug
-        ?
-        "<span class='chip'>"
-        +
-        bug.toUpperCase()
-        +
-        "</span>"
-        :
-        "<span style='color:#8f9eb0;'>لا يوجد</span>";
-
-
-    detEl.innerHTML =
-
-        "النظام "
-
-        +
-        fwDisplay
-
-        +
-        " &nbsp;•&nbsp; "
-
-        +
-        "الثغرة "
-
-        +
-        bugDisplay
-
-        +
-        " &nbsp;•&nbsp; "
-
-        +
-        why;
-
-
-    /*
-     * إذا لم تكن النسخة مدعومة
-     */
+    detEl.innerHTML = "النظام " + fwDisplay + " &nbsp;•&nbsp; " + "الثغرة " + bugDisplay + " &nbsp;•&nbsp; " + why;
 
     if (!bug) {
-
-        setState(
-            "نسخة غير مدعومة",
-            "bad"
-        );
-
+        setState("نسخة غير مدعومة", "bad");
         return;
-
     }
 
-
-    /*
-     * تحديد الصفحة المطلوبة
-     */
-
-    var target =
-
-        (
-            bug === "lapse"
-            ?
-            "run_lapse.html"
-            :
-            "PS4_13.00_Webkit.html"
-        )
-        +
-        location.search;
-
+    var target = (bug === "lapse" ? "run_lapse.html" : "PS4_13.00_Webkit.html") + location.search;
 
     window.go = function() {
-        setState(
-            "جارٍ تحميل "
-            +
-            bug
-            +
-            " ...",
-            "warn"
-        );
-
+        setState("جارٍ تحميل " + bug + " ...", "warn");
         location.replace(target);
     };
 
-
-    /*
-     * انتظار الضغط
-     */
-
     function waitForTap(msg, action) {
-
-        setState(
-            msg,
-            "warn"
-        );
-
-
+        setState(msg, "warn");
         function fire() {
-
-            window.removeEventListener(
-                "click",
-                fire
-            );
-
-
-            window.removeEventListener(
-                "keydown",
-                fire
-            );
-
-
+            window.removeEventListener("click", fire);
+            window.removeEventListener("keydown", fire);
             action();
-
         }
-
-
-        window.addEventListener(
-            "click",
-            fire
-        );
-
-
-        window.addEventListener(
-            "keydown",
-            fire
-        );
-
+        window.addEventListener("click", fire);
+        window.addEventListener("keydown", fire);
     }
 
-
-    /*
-     * Service Worker Integration
-     */
+    // Service Worker Integration with strict Cache Protection
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(function(registration) {
             console.log('ServiceWorker registered');
-            
-            // التحقق مما إذا كان الـ Service Worker مفعل مسبقاً أو قيد التثبيت
-            var worker = registration.installing || registration.waiting || registration.active;
-            
+
             if (!navigator.serviceWorker.controller) {
                 setState("جارٍ التخزين المؤقت للعمل أوفلاين...", "warn");
                 setCache("يرجى الانتظار، يتم الآن تحميل ملفات الثغرة و الـ .bin ...");
             }
 
-            // مراقبة حالة التثبيت
-            registration.onupdatefound = function() {
-                var installingWorker = registration.installing;
-                installingWorker.onstatechange = function() {
-                    if (installingWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
-                            setCache("تم التخزين المؤقت بنجاح — جاهز أوفلاين", true);
-                            waitForTap("اضغط هنا للبدء", go);
-                        }
-                    }
-                };
-            };
-
-            // إذا كان مخزناً مسبقاً وجاهزاً
-            if (navigator.serviceWorker.controller) {
-                setCache("التخزين المؤقت جاهز — يعمل أوفلاين", true);
-                waitForTap("جاهز — اضغط للتشغيل", go);
-            } else {
-                // مهلة احتياطية في حال كان التثبيت سريعاً جداً
+            // التحقق مما إذا تم تفعيل الكاش وتثبيته بالكامل
+            navigator.serviceWorker.ready.then(function() {
                 setTimeout(function() {
-                    setCache("تم تخزين الملفات بنجاح — جاهز أوفلاين", true);
-                    waitForTap("اضغط هنا للبدء", go);
-                }, 4000);
-            }
+                    setCache("تم التخزين المؤقت بنجاح — جاهز أوفلاين", true);
+                    waitForTap("جاهز — اضغط هنا للبدء", go);
+                }, 1500);
+            });
 
         }).catch(function(err) {
             console.log('ServiceWorker registration failed: ', err);
@@ -1207,6 +958,8 @@ Developed by Ahmed AbdElsalam @01017096872
         setCache("المتصفح لا يدعم التخزين المؤقت", false);
         waitForTap("اضغط للتشغيل", go);
     }
+
+})();
 
 </script>
 
