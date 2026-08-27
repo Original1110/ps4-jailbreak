@@ -1,4 +1,4 @@
-const CACHE_NAME = 'original-ps4-v2';
+const CACHE_NAME = 'original-ps4-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -20,7 +20,6 @@ const ASSETS = [
   'patches/1300.bin'
 ];
 
-// تثبيت الـ Service Worker وحفظ كافة الملفات (بما فيها ملفات الـ bin) في الكاش
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
@@ -30,7 +29,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// تفعيل الـ Service Worker وحذف النسخ القديمة للكاش
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -46,7 +44,6 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// جلب الملفات من الكاش عند انقطاع الإنترنت أو أثناء التشغيل
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
