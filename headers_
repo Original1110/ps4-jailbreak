@@ -1,2 +1,6 @@
 /original.cache
-  Content-Type: text/cache-manifest
+  Content-Type: text/cache-manifest; charset=utf-8
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/*
+  X-Content-Type-Options: nosniff
