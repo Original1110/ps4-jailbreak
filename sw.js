@@ -1,4 +1,4 @@
-const CACHE_NAME = 'original-ps4-v6';
+const CACHE_NAME = 'original-ps4-v7';
 
 // فصل الملفات الحساسة لضمان نجاح التثبيت الأساسي
 const CORE_ASSETS = [
