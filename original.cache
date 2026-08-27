@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Version 2.0.0
+# Version 2.0.1
 
 CACHE:
 index.html
@@ -9,7 +9,6 @@ sysctl.html
 chain_lapse.js
 chain_poops.js
 core.js
-core.js__query_v=10
 int64.js
 mem.js
 ps4_offsets.js
@@ -20,9 +19,3 @@ preview.png
 patches/1150.bin
 patches/1200.bin
 patches/1300.bin
-
-NETWORK:
-*
-
-SETTINGS:
-prefer-online
