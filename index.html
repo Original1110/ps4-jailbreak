@@ -1387,6 +1387,20 @@ Developed by Ahmed AbdElsalam @01017096872
 })();
 
 </script>
+  
+  <script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            setCache("تم التخزين المؤقت بنجاح — جاهز للعمل أوفلاين", true);
+        }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+            setCache("فشل تفعيل التخزين المؤقت للـ Service Worker");
+        });
+    });
+}
+</script>
 
 </body>
 </html>
