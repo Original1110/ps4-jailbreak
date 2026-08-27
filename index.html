@@ -1099,8 +1099,7 @@ Developed by Ahmed AbdElsalam @01017096872
         location.search;
 
 
-    function go() {
-
+    window.go = function() {
         setState(
             "جارٍ تحميل "
             +
@@ -1110,10 +1109,8 @@ Developed by Ahmed AbdElsalam @01017096872
             "warn"
         );
 
-
         location.replace(target);
-
-    }
+    };
 
 
     /*
@@ -1162,258 +1159,30 @@ Developed by Ahmed AbdElsalam @01017096872
 
 
     /*
-     * Application Cache
+     * Service Worker Integration
      */
-
-    var ac =
-        window.applicationCache;
-
-
-    if (
-        !ac ||
-        !document.documentElement
-            .hasAttribute("manifest")
-    ) {
-
-        go();
-
-    }
-
-    else if (!navigator.onLine) {
-
-        setCache(
-            "غير متصل — التشغيل من التخزين المؤقت",
-            true
-        );
-
-        go();
-
-    }
-
-    else if (
-        ac.status === ac.IDLE
-    ) {
-
-        setCache(
-            "التخزين المؤقت جاهز",
-            true
-        );
-
-        go();
-
-    }
-
-    else if (
-        ac.status === ac.UPDATEREADY
-    ) {
-
-        try {
-            ac.swapCache();
-        }
-        catch (e) {}
-
-
-        setCache(
-            "تم تحميل التحديث",
-            true
-        );
-
-
-        waitForTap(
-            "تحديث جاهز — اضغط للتحديث والتشغيل",
-            function () {
-
-                location.reload();
-
-            }
-        );
-
-    }
-
-    else {
-
-
-        setCache(
-            "جارٍ التحقق من التخزين المؤقت..."
-        );
-
-
-        ac.addEventListener(
-            "downloading",
-            function () {
-
-                setCache(
-                    "التخزين المؤقت للمرة الأولى..."
-                );
-
-            },
-            false
-        );
-
-
-        ac.addEventListener(
-            "progress",
-            function (e) {
-
-                if (
-                    e &&
-                    e.total
-                ) {
-
-                    setCache(
-                        "تخزين "
-                        +
-                        Math.round(
-                            (e.loaded / e.total) * 100
-                        )
-                        +
-                        "%"
-                    );
-
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
+                console.log('ServiceWorker registered');
+                setCache("التخزين المؤقت جاهز للعمل أوفلاين", true);
+                
+                if (!params.get('noredirect')) {
+                    waitForTap("جاهز — اضغط للتشغيل", go);
                 }
-
-            },
-            false
-        );
-
-
-        ac.addEventListener(
-            "cached",
-            function () {
-
-                setCache(
-                    "تم التخزين المؤقت — جاهز للاستخدام دون اتصال",
-                    true
-                );
-
-
-                waitForTap(
-                    "جاهز — اضغط للتشغيل",
-                    go
-                );
-
-            },
-            false
-        );
-
-
-        ac.addEventListener(
-            "updateready",
-            function () {
-
-                try {
-                    ac.swapCache();
-                }
-                catch (e) {}
-
-
-                setCache(
-                    "التحديث جاهز",
-                    true
-                );
-
-
-                waitForTap(
-                    "تحديث جاهز — اضغط لإعادة التحميل",
-                    function () {
-
-                        location.reload();
-
-                    }
-                );
-
-            },
-            false
-        );
-
-
-        ac.addEventListener(
-            "noupdate",
-            function () {
-
-                setCache(
-                    "التخزين المؤقت جاهز",
-                    true
-                );
-
-
-                go();
-
-            },
-            false
-        );
-
-
-        ac.addEventListener(
-            "error",
-            function () {
-
-                setCache(
-                    "فشل التخزين المؤقت"
-                );
-
-
-                waitForTap(
-                    "فشل التخزين — اضغط للتشغيل رغم ذلك",
-                    go
-                );
-
-            },
-            false
-        );
-
-
-        ac.addEventListener(
-            "obsolete",
-            function () {
-
-                setCache(
-                    "التخزين المؤقت قديم"
-                );
-
-
-                waitForTap(
-                    "التخزين قديم — اضغط للتشغيل",
-                    go
-                );
-
-            },
-            false
-        );
-
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+                setCache("فشل تفعيل التخزين المؤقت");
+                waitForTap("اضغط للتشغيل رغم ذلك", go);
+            });
+        });
+    } else {
+        setCache("جاهز للاستخدام", true);
+        waitForTap("اضغط للتشغيل", go);
     }
-
 
 })();
 
-</script>
-  
-
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').then(function(registration) {
-            console.log('ServiceWorker registered');
-            
-            // التحقق مما إذا كان تم التخزين لأول مرة أو تم التحديث
-            if (!navigator.serviceWorker.controller) {
-                setState("جارٍ التخزين المؤقت للعمل أوفلاين...", "warn");
-                setCache("يرجى الانتظار حتى اكتمال التحميل...");
-            } else {
-                setCache("التخزين المؤقت جاهز — يعمل أوفلاين", true);
-                // إتاحة زر أو السماح بالانتقال بعد الاكتمال
-                setTimeout(function() {
-                    if (typeof go === 'function' && !params.get('noredirect')) {
-                        // الانتظار للضغط أو التشغيل اليدوي لضمان عدم القفز السريع
-                    }
-                }, 2000);
-            }
-        }).catch(function(err) {
-            console.log('ServiceWorker registration failed: ', err);
-            setCache("فشل تفعيل التخزين المؤقت");
-        });
-    });
-}
 </script>
 
 </body>
